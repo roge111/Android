@@ -24,4 +24,54 @@ XML-файл должен начинаться с одной и той же ст
 
 ### Activity
 ---
-Это компонент, который отвечает за создание контейнера, куда можем положить наш интерфейс
+Это компонент, который отвечает за создание контейнера, куда можем положить наш интерфейс. Простые приложения состоят из одной активности, более сложные могут иметь несколько окон.
+Чтобы создать компонент `Activity`:
+1) Создать класс-наследник `AppCompatActivity`
+2) Добавить объявление `Activity` в манифест.
+
+### Создадим первый компонет
+----
+
+Для начала создаим проект:
+1) `File` → `New` → `New Project`
+2) В появившемся окне выберите `Empty Views Activity`
+
+Теперь дождемся полного создания. В левом верхнем угул будет надпись `Project`. Она должна сменить на `Android`, что будет показывать вам только те пакет, папки и файл, необходимые для приложения. Если этого не произойдет, то мы сами нажимаем на `Project`, в выпавшем списке выбираем `Android`. 
+
+
+Далее в директории `kotlin+java` в пакете не помеченым ни `androidTest`, ни `test` создаем класс котлина. По стандарту входной точкой приложения называют `MainActivity`. Внтури создаем класс и наследуем от `AppCompatActivity`.
+```
+package com.example.myapplication
+import androidx.appcompat.app.AppCompatActivity
+
+
+class MainActivity : AppCompatActivity() {
+
+}
+```
+
+В `AndroidManifest.xml` пишем следующее:
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:label="@string/app_name"
+        android:theme="@style/Theme.MyApplication">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+```
+
+В `application` пишем `lable`, где указываем называние, `theme` - стиль. 
