@@ -130,6 +130,11 @@ class MainActivity : AppCompatActivity() {
 - `android:layout_width` — атрибут ширины элемента;
 - `android:layout_height` — атрибут высоты элемента.
 
+Необязательные атрибуты:
+- id элемента
+- отсутп за счет модифицируемого UI-элемента
+- margin - отступ за счет родительского UI-элемента
+
 ### Практика
 ---
 
@@ -154,3 +159,87 @@ class MainActivity : AppCompatActivity() {
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 ```
+Текст можно задать при помощи атрибута `android:text`, а размер шрифта можно регулировать с помощью `android:textSize`. Единица измерения рекомендуется sp, что позволяет автоматически учитывать настройки размера шрифта пользователя.
+
+
+Создадим кнопку:
+```
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginLeft="16dp"
+        android:paddingLeft="16dp"
+        android:id="@+id/button"
+        android:text="Hello world" />
+```
+
+
+Отобразим это на нашем экране. Вернемся в наш компонент `MainActivity.kt`. 
+
+
+```
+package com.example.myapp
+
+
+import android.os.Bundle
+import android.os.PersistableBundle
+import androidx.activity.ComponentActivity
+import com.example.myapp.databinding.ActivityMainBinding
+
+
+class MainActivity : ComponentActivity() {
+//    Переопределим метод onCreate, в нем мы преобразуем верстку в иерархиб объектов
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Для получения иерархии вызовим у сгенированного класса метод inflate.
+        // Имя класса скалдывается из названия объект (activity_main) по camelCase и Binfing
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+    }
+}
+```
+Теперь наш интерфейс отображается на экране телефона. Добавим обработку нажатия кнопки:
+
+В нашей иерархии `binding` вызовем соответствующий id кнопки — `button`. И вызовем метод `setOnClickListener`. Сделаем так, что при нажатии в тексте будет увеличиваться число.
+```
+var count = 0
+        binding.button.setOnClickListener{
+            count ++
+            binding.text.text = "Hello world $count"
+
+        }
+```
+
+
+
+Полный код:
+
+```
+package com.example.myapp
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.example.myapp.databinding.ActivityMainBinding
+
+class MainActivity : AppCompatActivity() {
+    //    Переопределим метод onCreate, в нем мы преобразуем верстку в иерархиб объектов
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Для получения иерархии вызовим у сгенированного класса метод inflate.
+        // Имя класса скалдывается из названия объект (activity_main) по camelCase и Binfing
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+
+        var count = 0
+        binding.button.setOnClickListener{
+            count ++
+            binding.text.text = "Hello world $count"
+
+        }
+    }
+}
+```
+
+
+Теперь можно запускать.
