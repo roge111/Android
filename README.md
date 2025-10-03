@@ -288,3 +288,50 @@ class MainActivity : AppCompatActivity() {
 Сохраняем состояние в 2 шага:
 1) Переопределяем метод `onSaveInstanceSate`. В нем потребуется записать необходмые данные в Bundle. Этот метод гарантировано вызвается до уничтожения экрана (до `onDestroy`)
 2) Восстановть состояние в метдах `onRestoreInstanceState()` или `onCreate()`. Обыячно используют `onCreate`. Для этого нужно достать значени из Bundle по ключу.
+
+
+```
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+    // Переменная для хранения состояния
+    private var counter: Int = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Восстановление состояния, если оно существует
+        savedInstanceState?.let {
+            counter = it.getInt(KEY_COUNTER, 0)
+        }
+
+        // Установка значения счетчика в TextView
+        updateCounterText()
+
+        // Увеличение счетчика при нажатии на кнопку
+        incrementButton.setOnClickListener {
+            counter++
+            updateCounterText()
+        }
+    }
+
+    // Сохранение состояния
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_COUNTER, counter)
+    }
+
+    // Обновление текста счетчика в TextView
+    private fun updateCounterText() {
+        counterTextView.text = counter.toString()
+    }
+
+// Ключи для сохранения состояния
+    private companion object {
+        const val KEY_COUNTER = "counter"
+    }
+}
+```
