@@ -385,3 +385,90 @@ startActivity(intent)
  ```
 
 Здесь по ключу `EXTRA_MESSAGE` мы сохранили текст "Hello from MainActivity", а по ключу `EXTRA_NUMBER`  - 123 и сделали явный интент на `SecodActivity` (то есть переход).
+
+
+Заберем данные в `SecondActivity`:
+
+```
+override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_second)
+
+        val message = intent.getStringExtra("EXTRA_MESSAGE")
+        val number = intent.getIntExtra("EXTRA_NUMBER", 0)
+}
+```
+
+
+### Флаги навигации между Activity
+
+Все запускаемы приложения формируют стек, поведением котрого можно управлять при помощи флаов навигации:
+- `standart` - по умолчания каждая новая Activity будет запускаться как новая, даже если она уже усещствует
+- `singleTop` - если Activity уже находиться на вершине стека задач, то при повторном запуске не будет сосздан новый экземлпяр, а будет вызвна `onNewIntent`
+- `singeltTask` - если Activity уже существует в стеке задач, она будет переиспользована и все Activity выше нее будут удалены
+- `singleInstance` - похож на предыдщуее, но гаратирует, что эта Activity будет единственой в своей задаче
+
+Флаг запуска Activity можно указать либо в манифесте при помощи поля launchMode:
+```
+<activity
+    android:name=".MainActivity"
+    android:launchMode="singleTop">
+</activity>
+```
+Либо в коде, задав поле flags для Intent (flags отличаются от launchMode по названию):
+```
+val intent = Intent(this, SecondActivity::class.java) 
+intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+startActivity(intent)
+```
+
+# Как работает ACTION?
+
+Хочется немного остановиться и немного рассказать о том, как `action` находит подходящее приложение. 
+
+При создании приложения в манифесте идет объявление того, что умеет это приложение.
+Например:
+
+```
+<!-- В Яндекс.Браузере: -->
+<activity android:name=".YandexBrowserActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:scheme="http" />
+        <data android:scheme="https" />
+    </intent-filter>
+</activity>
+```
+
+Здесь мы видим, что приложение `Яндекс Браузер` может обрабатывать "http" и "https". В свою очередь, `action android:name="android.intent.action.VIEW"` говорит о том, что приложение может показывать/просматривать данные. И может обрабатывать, например, ссылки или файлы. А `<category android:name="android.intent.category.DEFAULT" />` — говорит, что Activity обязательна для неявных Intent. Ну, то есть включает видимость для других приложений.
+
+Далее, когда мы пишем `val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://google.com"))`, система Android включает фильтры — `intent-filter`. При установке приложения система андройда автоматически сканирует манифест и строит базу данных интент-фильтров. Пример:
+```
+Системная база данных:
+- Chrome:      ACTION_VIEW + (http|https)
+- Firefox:     ACTION_VIEW + (http|https)  
+- Яндекс:      ACTION_VIEW + (http|https)
+- Instagram:   ACTION_SEND + image/*
+- Камера:      ACTION_IMAGE_CAPTURE
+- Телефон:     ACTION_DIAL + tel
+```
+
+Тут для каждого приложения отображаются его возможности. Эти данные и берутся из манифеста. И как только мы делаем в коде `intent`, система начинает поиск:
+```
+// Ваш запрос:
+Intent(ACTION_VIEW, "https://google.com")
+
+// Система ищет совпадения по:
+// 1. Action: ACTION_VIEW
+// 2. Data: scheme="https", host="google.com"
+// 3. Category: DEFAULT (подразумевается)
+```
+
+Далее система возвращает список подходящих приложений.
+
+
+В системе андройда работает специальная служба `PackageManagerService`, которая:
+- запрашивает `AndroidManifest.xml` при установке приложения
+- строит индекс всех Intent Filter'ов.
+- При запросе быстро находит нужные приложения
